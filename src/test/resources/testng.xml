@@ -3,8 +3,26 @@
 <suite name="Products Management" verbose="1" >
     <test name="Create New Product [Chrome]" >
         <!--configure test to execute testing script using Chrome browser-->
+        <parameter name="browser-type" value="chrome" />
+        <classes>
+            <class name="myprojects.automation.assignment4.BaseTest"/>
+        </classes>
     </test>
 
-    <!--Prepare test for firefox and IE browsers-->
+    <test name="Create New Product [Firefox]" >
+        <!--configure test to execute testing script using Firefox browser-->
+        <parameter name="browser-type" value="firefox" />
+        <classes>
+            <class name="myprojects.automation.assignment4.BaseTest"/>
+        </classes>
+    </test>
+
+    <test name="Create New Product [IE]" >
+        <!--configure test to execute testing script using Firefox browser-->
+        <parameter name="browser-type" value="ie" />
+        <classes>
+            <class name="myprojects.automation.assignment4.BaseTest"/>
+        </classes>
+    </test>
 
 </suite>

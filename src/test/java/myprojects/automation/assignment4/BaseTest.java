@@ -8,6 +8,7 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
 
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -68,8 +69,8 @@ public abstract class BaseTest {
      * creates {@link ChromeDriver} instance by default.
      *
      */
+    @Parameters({ "browser-type" })
     @BeforeClass
-    // TODO use parameters from pom.xml to pass required browser type
     public void setUp(String browser ) {
         driver = new EventFiringWebDriver(getDriver(browser));
         driver.register(new EventHandler());
