@@ -9,6 +9,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+
+import java.util.List;
 
 import static myprojects.automation.assignment4.utils.Properties.*;
 
@@ -39,6 +42,9 @@ public class GeneralActions {
         signIn.click();                                                 // click login button
     }
 
+    /**
+     * Creates new product.
+     */
     public void createProduct(ProductData newProduct) {
         waitForContentLoad();
         Actions action = new Actions(driver);
@@ -64,11 +70,39 @@ public class GeneralActions {
         itemPriceField.sendKeys(newProduct.getPrice());
 
         // toggle visibility, save and close notification
-        js.executeScript("document.getElementsByClassName('switch-input')[0].setAttribute('class', 'switch-input -checked')");
+        WebElement toggle = driver.findElement(By.className("switch-input "));
+        action.moveToElement(toggle).click().perform();
+        WebElement growl = driver.findElement(By.className("growl-close"));
+        action.moveToElement(growl).click().perform();
         WebElement button = driver.findElement(By.id("submit"));
         button.submit();
-        WebElement growl = driver.findElement(By.className("growl-close"));
-        growl.click();
+        WebElement growl2 = driver.findElement(By.className("growl-close"));
+        action.moveToElement(growl2).click().perform();
+    }
+
+    /**
+     * Checks if product available on site.
+     */
+    public void checkProductAvailability(ProductData newProduct) {
+        driver.get(getBaseUrl());                                       // open site
+        WebElement allProducts = driver.findElement(By.className("all-product-link"));
+        allProducts.click();                                            // select all items
+
+        // finds all products link on page
+        List<WebElement> products = driver.findElements(By.xpath("//h1[@class='h3 product-title']/a"));
+        WebElement element = null;
+        for (WebElement product : products) {
+            if (product.getText().equals(newProduct.getName())) element = product;
+        }
+
+        // enters into the product page if exist
+        Assert.assertNotNull(element);
+        element.click();
+
+        // confirms product name, quantity and price
+        Assert.assertEquals(driver.findElement(By.xpath("//h1[@itemprop='name']")).getText(), newProduct.getName().toUpperCase());
+        Assert.assertEquals(driver.findElement(By.xpath("//div[@class='product-quantities']/span")).getText().replaceAll("\\D", ""), newProduct.getQty().toString());
+        Assert.assertEquals(driver.findElement(By.xpath("//span[@itemprop='price']")).getAttribute("content").replaceAll("\\.", ","), newProduct.getPrice());
     }
 
     /**
