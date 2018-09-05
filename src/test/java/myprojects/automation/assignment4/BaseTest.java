@@ -8,6 +8,7 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Parameters;
 
 import java.net.URISyntaxException;
@@ -90,5 +91,12 @@ public abstract class BaseTest {
         if (driver != null) {
             driver.quit();
         }
+    }
+
+    @DataProvider(name="login")
+    public Object[][] getData() {
+        return new Object[][] {
+                {"webinar.test@gmail.com", "Xcg7299bnSmMuRLp9ITw"},
+        };
     }
 }
