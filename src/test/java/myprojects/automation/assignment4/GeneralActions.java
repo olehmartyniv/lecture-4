@@ -111,6 +111,7 @@ public class GeneralActions {
         } while (!next.getAttribute("class").contains("disabled"));
 
         // enters into the product page if exist
+        waitForPageLoad();
         Assert.assertTrue(element.isDisplayed());
         element.click();
 
@@ -139,9 +140,8 @@ public class GeneralActions {
      * Waits until page is fully loaded
      */
     public void waitForNotificationWindow() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("growl")));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("growl-close")));
         WebElement growl = driver.findElement(By.className("growl-close"));
-        Actions action = new Actions(driver);
-        action.moveToElement(growl).click().perform();
+        growl.click();
     }
 }
