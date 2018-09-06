@@ -70,12 +70,14 @@ public class GeneralActions {
         itemPriceField.sendKeys(newProduct.getPrice());
 
         // toggle visibility, save and close notification
-        WebElement toggle = driver.findElement(By.className("switch-input "));
+        WebElement toggle = driver.findElement(By.className("switch-input"));
         action.moveToElement(toggle).click().perform();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("growl-close")));
         WebElement growl = driver.findElement(By.className("growl-close"));
         action.moveToElement(growl).click().perform();
         WebElement button = driver.findElement(By.id("submit"));
         button.submit();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("growl-close")));
         WebElement growl2 = driver.findElement(By.className("growl-close"));
         action.moveToElement(growl2).click().perform();
     }
@@ -88,12 +90,26 @@ public class GeneralActions {
         WebElement allProducts = driver.findElement(By.className("all-product-link"));
         allProducts.click();                                            // select all items
 
-        // finds all products link on page
-        List<WebElement> products = driver.findElements(By.xpath("//h1[@class='h3 product-title']/a"));
+        // finds all products links on page
+        WebElement next;
+        List<WebElement> products;
         WebElement element = null;
-        for (WebElement product : products) {
-            if (product.getText().equals(newProduct.getName())) element = product;
-        }
+
+        do {
+            wait.until(wd -> ((JavascriptExecutor) wd).executeScript("return document.readyState").equals("complete"));
+            next = driver.findElement(By.xpath("//a[@rel='next']"));
+            products = driver.findElements(By.xpath("//h1[@class='h3 product-title']/a"));
+
+            for (WebElement product : products) {
+                if (product.getText().equals(newProduct.getName())) {
+                    element = product;
+                    break;
+                }
+            }
+
+            if (element == null) next.click();
+            else break;
+        } while (!next.getAttribute("class").contains("disabled"));
 
         // enters into the product page if exist
         Assert.assertNotNull(element);
