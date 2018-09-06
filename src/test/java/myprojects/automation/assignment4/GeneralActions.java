@@ -34,6 +34,7 @@ public class GeneralActions {
      */
     public void login(String login, String password) {
         driver.get(getBaseAdminUrl());                                  // open admin page
+        waitForPageLoad();
         WebElement email = driver.findElement(By.id("email"));
         email.sendKeys(login);                                          // fill email
         WebElement pass = driver.findElement(By.id("passwd"));
@@ -55,6 +56,7 @@ public class GeneralActions {
         WebElement addItemButton = driver.findElement(By.id("page-header-desc-configuration-add"));
         addItemButton.click();                                          // click add button
 
+        waitForPageLoad();
         WebElement itemNameField = driver.findElement(By.id("form_step1_name_1"));
         itemNameField.sendKeys(newProduct.getName());                   // fill product name form
 
@@ -72,14 +74,10 @@ public class GeneralActions {
         // toggle visibility, save and close notification
         WebElement toggle = driver.findElement(By.className("switch-input"));
         action.moveToElement(toggle).click().perform();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("growl-close")));
-        WebElement growl = driver.findElement(By.className("growl-close"));
-        action.moveToElement(growl).click().perform();
+        waitForNotificationWindow();
         WebElement button = driver.findElement(By.id("submit"));
         button.submit();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("growl-close")));
-        WebElement growl2 = driver.findElement(By.className("growl-close"));
-        action.moveToElement(growl2).click().perform();
+        waitForNotificationWindow();
     }
 
     /**
@@ -87,6 +85,7 @@ public class GeneralActions {
      */
     public void checkProductAvailability(ProductData newProduct) {
         driver.get(getBaseUrl());                                       // open site
+        waitForPageLoad();
         WebElement allProducts = driver.findElement(By.className("all-product-link"));
         allProducts.click();                                            // select all items
 
@@ -96,7 +95,7 @@ public class GeneralActions {
         WebElement element = null;
 
         do {
-            wait.until(wd -> ((JavascriptExecutor) wd).executeScript("return document.readyState").equals("complete"));
+            waitForPageLoad();
             next = driver.findElement(By.xpath("//a[@rel='next']"));
             products = driver.findElements(By.xpath("//h1[@class='h3 product-title']/a"));
 
@@ -112,10 +111,11 @@ public class GeneralActions {
         } while (!next.getAttribute("class").contains("disabled"));
 
         // enters into the product page if exist
-        Assert.assertNotNull(element);
+        Assert.assertTrue(element.isDisplayed());
         element.click();
 
         // confirms product name, quantity and price
+        waitForPageLoad();
         Assert.assertEquals(driver.findElement(By.xpath("//h1[@itemprop='name']")).getText(), newProduct.getName().toUpperCase());
         Assert.assertEquals(driver.findElement(By.xpath("//div[@class='product-quantities']/span")).getText().replaceAll("\\D", ""), newProduct.getQty().toString());
         Assert.assertEquals(driver.findElement(By.xpath("//span[@itemprop='price']")).getAttribute("content").replaceAll("\\.", ","), newProduct.getPrice());
@@ -126,5 +126,22 @@ public class GeneralActions {
      */
     public void waitForContentLoad() {
         wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("ajax_running")));
+    }
+
+    /**
+     * Waits until page is fully loaded
+     */
+    public void waitForPageLoad() {
+        wait.until(wd -> ((JavascriptExecutor) wd).executeScript("return document.readyState").equals("complete"));
+    }
+
+    /**
+     * Waits until page is fully loaded
+     */
+    public void waitForNotificationWindow() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("growl")));
+        WebElement growl = driver.findElement(By.className("growl-close"));
+        Actions action = new Actions(driver);
+        action.moveToElement(growl).click().perform();
     }
 }

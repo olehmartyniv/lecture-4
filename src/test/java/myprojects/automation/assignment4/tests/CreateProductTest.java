@@ -2,8 +2,11 @@ package myprojects.automation.assignment4.tests;
 
 import myprojects.automation.assignment4.BaseTest;
 import myprojects.automation.assignment4.model.ProductData;
+import myprojects.automation.assignment4.utils.logging.TestListener;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+@Listeners(TestListener.class)
 public class CreateProductTest extends BaseTest {
     private final ProductData newProduct = ProductData.generate();
 
