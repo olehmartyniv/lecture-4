@@ -2,10 +2,7 @@ package myprojects.automation.assignment4;
 
 
 import myprojects.automation.assignment4.model.ProductData;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -92,34 +89,32 @@ public class GeneralActions {
         // finds all products links on page
         WebElement next;
         List<WebElement> products;
-        WebElement element = null;
+        WebElement element;
 
+        outerloop:
         do {
             waitForPageLoad();
-            next = driver.findElement(By.xpath("//a[@rel='next']"));
             products = driver.findElements(By.xpath("//h1[@class='h3 product-title']/a"));
 
             for (WebElement product : products) {
+                // enter into the product page if exist
                 if (product.getText().equals(newProduct.getName())) {
-                    element = product;
-                    break;
+                    element = driver.findElement(By.linkText(newProduct.getName()));
+                    Assert.assertTrue(element.isDisplayed());
+                    retryingClickElement(By.linkText(newProduct.getName()));
+                    break outerloop;
                 }
             }
 
-            if (element == null) next.click();
-            else break;
-        } while (!next.getAttribute("class").contains("disabled"));
-
-        // enters into the product page if exist
-        waitForPageLoad();
-        Assert.assertTrue(element.isDisplayed());
-        element.click();
+            next = driver.findElement(By.xpath("//a[@rel='next']"));
+            if (!next.getAttribute("class").contains("disabled")) next.click();
+        } while (true);
 
         // confirms product name, quantity and price
         waitForPageLoad();
         Assert.assertEquals(driver.findElement(By.xpath("//h1[@itemprop='name']")).getText(), newProduct.getName().toUpperCase());
         Assert.assertEquals(driver.findElement(By.xpath("//div[@class='product-quantities']/span")).getText().replaceAll("\\D", ""), newProduct.getQty().toString());
-        Assert.assertEquals(driver.findElement(By.xpath("//span[@itemprop='price']")).getAttribute("content").replaceAll("\\.", ","), newProduct.getPrice());
+        Assert.assertEquals(driver.findElement(By.xpath("//span[@itemprop='price']")).getText().replaceAll("\\s.", ""), newProduct.getPrice());
     }
 
     /**
@@ -143,5 +138,15 @@ public class GeneralActions {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("growl-close")));
         WebElement growl = driver.findElement(By.className("growl-close"));
         growl.click();
+    }
+
+    public void retryingClickElement(By by) {
+        for (int i = 0; i < 4; i++) {
+            try {
+                driver.findElement(by).click();
+                break;
+            } catch(StaleElementReferenceException e) {
+            }
+        }
     }
 }
